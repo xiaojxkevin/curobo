@@ -6,8 +6,8 @@ No gripper TCP offset or gripper articulation is included.
 
 ## Sources and deployment adaptations
 
-The supplied deployment meshes are retained under `meshes/`. The URDF joint
-limits and inertial parameters match
+The supplied deployment meshes are retained under `meshes/`. The nominal joint
+limits and inertial parameters are based on
 [agx_arm_urdf 680fa92](https://github.com/agilexrobotics/agx_arm_urdf/blob/680fa925cd00db7e2628563d2edc5540963045de/piper_x/urdf/piper_x_description.urdf),
 including the corrected link6 inertia and J6 range of +/-170 degrees.
 
@@ -20,12 +20,15 @@ The deployment adaptations are:
   the deployment model uses the 35.26 mm MDH length in
   [pyAgxArm d90e234](https://github.com/agilexrobotics/pyAgxArm/blob/d90e234ba8e408cfa964b38aa9120b3131fc9f85/pyAgxArm/api/constants.py)
   and the deployment client's training FK.
+- J2's lower limit is extended from 0 to -3 degrees and J3's upper limit from
+  0 to +3 degrees for IK near the reported zero pose. The opposite boundaries,
+  joint origins/axes and execution calibration retain their existing values.
 
 | Joint | Lower / upper limit (degrees, rounded) |
 | --- | --- |
 | joint1 | -150 / 150 |
-| joint2 | 0 / 180 |
-| joint3 | -170 / 0 |
+| joint2 | -3 / 180 |
+| joint3 | -170 / 3 |
 | joint4 | -89 / 89 |
 | joint5 | -89 / 89 |
 | joint6 | -170 / 170 |
@@ -36,16 +39,21 @@ zero or physical stops. Client calibration can impose narrower command ranges.
 ## Collision configuration
 
 The robot configuration is `curobo/content/configs/robot/piper_x.yml`.
-It contains 352 spheres: 32 each for base_link, link1, link4, link5 and link6,
-and 96 each for link2 and link3. Sphere and self-collision buffers are zero.
+It contains 456 spheres: 32 each for base_link, link5 and link6; 77 for link1,
+103 for link2, 141 for link3 and 39 for link4. Sphere and self-collision buffers are zero.
 The spheres were refined from the robot builder output by clustering subdivided
 STL triangles. Each subdivided triangle is contained in a sphere with about
 0.2 mm margin; this certifies surface coverage, not complete solid-volume coverage.
+Eight patches on link1 through link4 were locally split into smaller spheres to
+reduce conservative link1/link3 and link2/link4 overlap near J3=+3 degrees.
+The other sphere definitions, link geometry and collision ignores are unchanged.
 
 The six adjacent link pairs and base_link/link2 are ignored. All other unordered
-cross-link pairs are checked, totaling 14 link pairs / 28672 sphere pairs.
-The base_link/link2 exclusion was checked independently over the full J2 range,
-with a conservative original-mesh clearance lower bound of 5.22 mm.
+cross-link pairs are checked, totaling 14 link pairs / 47477 sphere pairs.
+The base_link/link2 exclusion was checked independently over the nominal J2 range
+[0,180] degrees, with a conservative original-mesh clearance lower bound of
+5.22 mm. Expanded-range sampling found minimum mesh clearance of 5.38 mm;
+that sampling is not a continuous-range proof.
 
 Flange and gripper mesh files are retained as supplied assets but are not attached
 to this URDF and do not add collision geometry. The model does not describe a
@@ -54,7 +62,7 @@ configuration; the presence of spheres in this YAML does not enable it by itself
 
 ## Validation scope
 
-Offline validation used this model with the deployment client and RTX 3090:
+The original 352-sphere model was validated with the deployment client and RTX 3090:
 
 - Independent URDF FK versus training/SDK MDH FK: 1066 configurations, including
   all 64 joint-limit corners; maximum position difference 3.55e-8 m and rotation
