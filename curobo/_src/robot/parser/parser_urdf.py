@@ -222,6 +222,7 @@ class UrdfRobotParser(RobotParser):
 
                 if joint.mimic is not None:
                     joint_offset = [joint.mimic.multiplier, joint.mimic.offset]
+                    body_params["mimic_joint_offset"] = joint_offset.copy()
                     # read joint limits of active joint:
                     mimic_joint_name = joint_name
                     active_joint_name = joint.mimic.joint

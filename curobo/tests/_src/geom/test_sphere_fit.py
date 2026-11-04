@@ -11,6 +11,7 @@ import pytest
 # CuRobo
 from curobo._src.geom.sphere_fit.fit_spheres import fit_spheres_to_mesh
 from curobo._src.geom.sphere_fit.fit_voxel import (
+    _build_bbox_grid,
     sample_even_fit_mesh,
     voxel_fit_mesh,
 )
@@ -92,6 +93,26 @@ class TestSampleEvenFitMesh:
 
 class TestVoxelFitMesh:
     """Test voxel_fit_mesh function."""
+
+    def test_thin_mesh_grid_stays_inside_bounds(self) -> None:
+        """Thin links retain centred interior samples even with a small sphere budget."""
+        mesh = Cuboid(
+            name="thin_link", pose=[0, 0, 0, 1, 0, 0, 0], dims=[0.004, 0.08, 0.06]
+        ).get_trimesh_mesh()
+        grid = _build_bbox_grid(mesh, 3)
+        assert len(grid) > 0
+        assert np.all(grid > mesh.bounds[0])
+        assert np.all(grid < mesh.bounds[1])
+        np.testing.assert_allclose(grid.mean(axis=0), mesh.bounds.mean(axis=0), atol=1e-7)
+
+    def test_thin_mesh_has_volume_seeds(self) -> None:
+        """A solid thin link must not fall back to a few surface-only spheres."""
+        mesh = Cuboid(
+            name="thin_link", pose=[0, 0, 0, 1, 0, 0, 0], dims=[0.004, 0.08, 0.06]
+        ).get_trimesh_mesh()
+        points, radii = voxel_fit_mesh(mesh, 3)
+        assert points is not None and len(points) > 0
+        assert np.all(radii > 0)
 
     def test_basic_voxel_fit(self, large_cuboid_mesh):
         """Test basic voxel mesh fitting on larger mesh."""

@@ -38,6 +38,8 @@ class LinkParams:
     link_inertia: np.ndarray = field(
         default_factory=lambda: np.array([1e-4, 1e-4, 1e-4, 0.0, 0.0, 0.0])
     )
+    #: URDF mimic multiplier/offset before axis normalization, for raw joint feedback.
+    mimic_joint_offset: Optional[List[float]] = None
 
     @staticmethod
     def create(dict_data: Dict[str, Any]) -> LinkParams:

@@ -135,7 +135,7 @@ from curobo.logging import setup_logger
 from curobo.robot_builder import RobotBuilder
 
 
-def build_new_robot(args):
+def build_new_robot(args: argparse.Namespace) -> RobotBuilder:
     """Build a new robot model from URDF."""
     print(f"Building robot model from URDF: {args.urdf}")
     print(f"Asset path: {args.asset_path}")
@@ -159,6 +159,7 @@ def build_new_robot(args):
         sphere_density=args.sphere_density,
         coverage_weight=args.coverage_weight,
         protrusion_weight=args.protrusion_weight,
+        use_collision_mesh=args.use_collision_mesh,
         compute_metrics=args.compute_metrics,
         clip_links=clip_links,
     )
@@ -237,6 +238,8 @@ def build_new_robot(args):
         except KeyboardInterrupt:
             print("\nStopping visualization")
 
+    return builder
+
 
 def edit_existing_robot(args):
     """Edit an existing robot configuration."""
@@ -253,6 +256,7 @@ def edit_existing_robot(args):
         new_spheres = builder.refit_link_spheres(
             args.refit_link,
             sphere_density=args.sphere_density,
+            use_collision_mesh=args.use_collision_mesh,
         )
         print(f"Fitted {len(new_spheres)} spheres to {args.refit_link}")
 
@@ -330,6 +334,7 @@ def test():
             sphere_density=1.0,
             coverage_weight=None,
             protrusion_weight=None,
+            use_collision_mesh=True,
             compute_metrics=True,
             clip_link=None,
             num_collision_samples=100,
@@ -377,6 +382,7 @@ def test():
             sphere_density=1.0,
             coverage_weight=None,
             protrusion_weight=None,
+            use_collision_mesh=True,
             compute_metrics=False,
             clip_link=None,
             num_collision_samples=100,
@@ -405,6 +411,7 @@ def test():
             sphere_density=1.0,
             coverage_weight=None,
             protrusion_weight=None,
+            use_collision_mesh=True,
             compute_metrics=False,
             clip_link=None,
             num_collision_samples=100,
@@ -476,6 +483,11 @@ def main():
     )
 
     # Sphere fitting arguments
+    parser.add_argument(
+        "--use-collision-mesh",
+        action="store_true",
+        help="Fit URDF collision geometry instead of visual geometry",
+    )
     parser.add_argument(
         "--sphere-density",
         type=float,

@@ -410,7 +410,10 @@ class KinematicsLoader(KinematicsLoaderCfg):
                     if body.joint_name not in self._mimic_joint_data:
                         self._mimic_joint_data[body.joint_name] = []
                     self._mimic_joint_data[body.joint_name].append(
-                        {"joint_offset": body.joint_offset, "joint_name": body.mimic_joint_name}
+                        {
+                            "joint_offset": body.mimic_joint_offset or body.joint_offset,
+                            "joint_name": body.mimic_joint_name,
+                        }
                     )
                 else:
                     self._active_joints.append(i)

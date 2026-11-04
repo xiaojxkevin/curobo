@@ -1,6 +1,15 @@
 
 Licenses for external assets are listed here:
 
+xArm6 with xArm gripper
+----------------------
+
+Assets: curobo/content/assets/robot/xarm6_with_gripper/
+Source: https://github.com/xArm-Developer/xarm_ros2
+Revision: 5bb832f72ca665f1236a9d8ed1c3a82f308db489
+License: BSD-3-Clause, retained in the asset directory's LICENSE file.
+The local README and manifest record preparation changes and file hashes.
+
 franka_ros 0.7.0
 ----------------
 

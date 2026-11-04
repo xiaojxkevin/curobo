@@ -87,9 +87,11 @@ def _build_bbox_grid(mesh: trimesh.Trimesh, num_spheres: int) -> np.ndarray:
     ny = max(int(np.ceil(extents[1] / pitch)), 1)
     nz = max(int(np.ceil(extents[2] / pitch)), 1)
 
-    xs = np.linspace(lo[0] + pitch / 2, hi[0] - pitch / 2, nx)
-    ys = np.linspace(lo[1] + pitch / 2, hi[1] - pitch / 2, ny)
-    zs = np.linspace(lo[2] + pitch / 2, hi[2] - pitch / 2, nz)
+    # Each axis has its own cell width after rounding the cell count. Using
+    # the nominal pitch can put the sole sample of a thin axis outside the mesh.
+    xs = lo[0] + (np.arange(nx) + 0.5) * extents[0] / nx
+    ys = lo[1] + (np.arange(ny) + 0.5) * extents[1] / ny
+    zs = lo[2] + (np.arange(nz) + 0.5) * extents[2] / nz
 
     grid = np.stack(np.meshgrid(xs, ys, zs, indexing="ij"), axis=-1)
     return grid.reshape(-1, 3)
